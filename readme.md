@@ -14,6 +14,7 @@ and ranks suitable rental listings.
 
 ## Current Architecture
 
+```text
 User Query
     ↓
 LLM Preference Parser
@@ -23,6 +24,7 @@ Structured RentalPreferences
 Python Filtering & Ranking
     ↓
 Ranked Rental Listings
+```
 
 ## Planned Features
 
