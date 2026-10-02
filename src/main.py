@@ -10,6 +10,7 @@
 # )
 
 import pandas as pd
+from recommendation_explainer import explain_recommendations
 from pathlib import Path
 from preference_parser import parse_preferences
 from ranking import rank_listings
@@ -63,8 +64,16 @@ print(
             "rent",
             "mrt_walk_minutes",
             "commute_minutes",
-            "score"
+            "match_percentage"
         ]
     ]
 )
 
+#LLM explains result
+recommendation = explain_recommendations(
+    ranked,
+    preferences
+)
+
+print("\nRentWise Recommendation:\n")
+print(recommendation)
