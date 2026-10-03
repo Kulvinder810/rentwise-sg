@@ -31,14 +31,16 @@ with a live-in landlord.
 
 Being close to MRT would also be nice.
 """
-
+query="""
+Master room under S$500, private bathroom, 5-minute commute, no landlord, cooking allowed.
+"""
 
 # STEP 1:
 # Let the LLM understand the user
 preferences = parse_preferences(query)
 
-print("\nExtracted preferences:")
-print(preferences.model_dump_json(indent=2))
+# print("\nExtracted preferences:")
+# print(preferences.model_dump_json(indent=2))
 
 
 # STEP 2:
@@ -48,32 +50,44 @@ listings = pd.read_csv(data_path)
 
 # STEP 3:
 # Use deterministic Python logic
+# print("\nExtracted Preferences:")
+# print(preferences.model_dump_json(indent=2))
+
 ranked = rank_listings(
     listings,
     preferences
 )
 
+print("\nRanked rows:", len(ranked))
+print(ranked)
 
-print("\nBest matching rentals:\n")
+if ranked.empty:
+    print("\nNo properties matched all of your hard requirements.")
+    print(
+        "Try relaxing one or more constraints such as "
+        "budget, commute time, cooking requirements, "
+        "or landlord preference."
+    )
 
-print(
-    ranked[
-        [
-            "title",
-            "area",
-            "rent",
-            "mrt_walk_minutes",
-            "commute_minutes",
-            "match_percentage"
-        ]
-    ]
-)
+else:
+    print("\nRanked Listings:\n")
 
-#LLM explains result
-recommendation = explain_recommendations(
-    ranked,
-    preferences
-)
+    print(
+        ranked[
+            [
+                "title",
+                "rent",
+                "mrt_walk_minutes",
+                "commute_minutes",
+                "match_percentage"
+            ]
+        ].head(3)
+    )
 
-print("\nRentWise Recommendation:\n")
-print(recommendation)
+    recommendation = explain_recommendations(
+        ranked,
+        preferences
+    )
+
+    print("\nRentWise Recommendation:\n")
+    print(recommendation)

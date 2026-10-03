@@ -1,26 +1,51 @@
-# src/ranking.py
-
-import pandas as pd
-
-from models import RentalPreferences
-
-
 def rank_listings(
     listings: pd.DataFrame,
     preferences: RentalPreferences
 ) -> pd.DataFrame:
-    # --------------------------
-    # SOFT PREFERENCE SCORE
-    # --------------------------
 
     results = listings.copy()
 
-    results["raw_score"] = 0.0
+    # ==========================================
+    # 1. HARD CONSTRAINTS
+    # ==========================================
 
+    if preferences.max_rent is not None:
+        results = results[
+            results["rent"] <= preferences.max_rent
+        ]
+
+    if preferences.max_commute_minutes is not None:
+        results = results[
+            results["commute_minutes"]
+            <= preferences.max_commute_minutes
+        ]
+
+    if preferences.cooking_required is True:
+        results = results[
+            results["cooking_allowed"] == True
+        ]
+
+    if preferences.no_live_in_landlord is True:
+        results = results[
+            results["live_in_landlord"] == False
+        ]
+
+    # IMPORTANT:
+    # If hard filtering removed everything,
+    # stop immediately.
+    if results.empty:
+        return results
+
+    # ==========================================
+    # 2. SOFT-PREFERENCE SCORING
+    # ==========================================
+
+    results = results.copy()
+
+    results["raw_score"] = 0.0
     possible_score = 0
 
-
-    # MRT proximity — max 30 points
+    # MRT proximity
     if preferences.near_mrt_preferred is True:
 
         possible_score += 30
@@ -32,8 +57,7 @@ def rank_listings(
             * 30
         )
 
-
-    # Shorter commute — max 30 points
+    # Shorter commute
     if preferences.max_commute_minutes is not None:
 
         possible_score += 30
@@ -48,8 +72,7 @@ def rank_listings(
             * 30
         )
 
-
-    # Preferred room type — max 20 points
+    # Preferred room type
     if preferences.preferred_room_type is not None:
 
         possible_score += 20
@@ -60,8 +83,7 @@ def rank_listings(
             "raw_score"
         ] += 20
 
-
-    # Private bathroom — max 20 points
+    # Private bathroom
     if preferences.private_bathroom_preferred is True:
 
         possible_score += 20
@@ -71,8 +93,10 @@ def rank_listings(
             "raw_score"
         ] += 20
 
+    # ==========================================
+    # 3. NORMALIZE SCORE
+    # ==========================================
 
-    # Convert to percentage
     if possible_score > 0:
 
         results["match_percentage"] = (
@@ -82,13 +106,14 @@ def rank_listings(
         ).round(1)
 
     else:
-        # User gave only hard constraints.
-        # Every surviving listing satisfies them.
         results["match_percentage"] = 100.0
+
+    # ==========================================
+    # 4. GENERATE EXPLANATIONS
+    # ==========================================
 
     results["reasons"] = None
     results["tradeoffs"] = None
-
 
     for index, listing in results.iterrows():
 
@@ -100,102 +125,7 @@ def rank_listings(
         results.at[index, "reasons"] = reasons
         results.at[index, "tradeoffs"] = tradeoffs
 
-
     return results.sort_values(
         "match_percentage",
         ascending=False
     )
-
-def generate_match_reasons(
-    listing,
-    preferences: RentalPreferences
-):
-
-    reasons = []
-    tradeoffs = []
-
-    # Budget
-    if preferences.max_rent is not None:
-
-        savings = preferences.max_rent - listing["rent"]
-
-        reasons.append(
-            f"Rent is S${listing['rent']}, "
-            f"S${savings} below your maximum budget."
-        )
-
-    # Commute
-    if preferences.max_commute_minutes is not None:
-
-        reasons.append(
-            f"Commute is approximately "
-            f"{listing['commute_minutes']} minutes."
-        )
-
-    # Cooking
-    if preferences.cooking_required is True:
-
-        reasons.append(
-            "Cooking is allowed."
-        )
-
-    # Landlord
-    if preferences.no_live_in_landlord is True:
-
-        reasons.append(
-            "No live-in landlord."
-        )
-
-    # MRT
-    if preferences.near_mrt_preferred is True:
-
-        walk = listing["mrt_walk_minutes"]
-
-        if walk <= 5:
-            reasons.append(
-                f"Very close to MRT: about {walk} minutes walking."
-            )
-
-        elif walk <= 10:
-            reasons.append(
-                f"Reasonably close to MRT: about {walk} minutes walking."
-            )
-
-        else:
-            tradeoffs.append(
-                f"MRT is around {walk} minutes walking."
-            )
-
-    # Room type
-    if preferences.preferred_room_type is not None:
-
-        if (
-            listing["room_type"].lower()
-            == preferences.preferred_room_type.lower()
-        ):
-            reasons.append(
-                f"Matches your preferred "
-                f"{preferences.preferred_room_type} room type."
-            )
-
-        else:
-            tradeoffs.append(
-                f"This is a {listing['room_type']} room "
-                f"instead of your preferred "
-                f"{preferences.preferred_room_type} room."
-            )
-
-    # Bathroom
-    if preferences.private_bathroom_preferred is True:
-
-        if listing["private_bathroom"]:
-            reasons.append(
-                "Includes a private bathroom."
-            )
-
-        else:
-            tradeoffs.append(
-                "Does not include a private bathroom."
-            )
-
-    return reasons, tradeoffs
