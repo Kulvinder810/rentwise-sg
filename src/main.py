@@ -10,10 +10,13 @@
 # )
 
 import pandas as pd
+from rag_recommender import generate_rag_recommendation
 from recommendation_explainer import explain_recommendations
 from pathlib import Path
 from preference_parser import parse_preferences
 from ranking import rank_listings
+from semantic_search import semantic_search
+from hybrid_ranking import combine_scores
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 data_path = BASE_DIR / "data" / "listings.csv"
@@ -31,63 +34,67 @@ with a live-in landlord.
 
 Being close to MRT would also be nice.
 """
-query="""
-Master room under S$500, private bathroom, 5-minute commute, no landlord, cooking allowed.
-"""
-
-# STEP 1:
-# Let the LLM understand the user
+# query="""
+# Master room under S$500, private bathroom, 5-minute commute, no landlord, cooking allowed.
+# """
+# 1. Understand user
 preferences = parse_preferences(query)
 
-# print("\nExtracted preferences:")
-# print(preferences.model_dump_json(indent=2))
+
+# 2. Load listings
+listings = pd.read_csv(
+    BASE_DIR / "data" / "listings.csv"
+)
 
 
-# STEP 2:
-# Load structured rental data
-listings = pd.read_csv(data_path)
-
-
-# STEP 3:
-# Use deterministic Python logic
-# print("\nExtracted Preferences:")
-# print(preferences.model_dump_json(indent=2))
-
+# 3. Hard filtering + structured ranking
 ranked = rank_listings(
     listings,
     preferences
 )
 
-print("\nRanked rows:", len(ranked))
-print(ranked)
 
 if ranked.empty:
-    print("\nNo properties matched all of your hard requirements.")
+
     print(
-        "Try relaxing one or more constraints such as "
-        "budget, commute time, cooking requirements, "
-        "or landlord preference."
+        "\nNo properties matched "
+        "your hard requirements."
     )
 
 else:
-    print("\nRanked Listings:\n")
+
+    # 4. Semantic search ONLY over valid listings
+    semantic_results = semantic_search(
+        ranked,
+        query
+    )
+
+
+    # 5. Combine both ranking signals
+    final_results = combine_scores(
+        semantic_results
+    )
+
+
+    print("\nFinal RentWise Ranking:\n")
 
     print(
-        ranked[
+        final_results[
             [
                 "title",
-                "rent",
-                "mrt_walk_minutes",
-                "commute_minutes",
-                "match_percentage"
+                "match_percentage",
+                "semantic_score",
+                "semantic_percentage",
+                "final_score"
             ]
-        ].head(3)
+        ].head(5)
     )
 
-    recommendation = explain_recommendations(
-        ranked,
-        preferences
+    rag_answer = generate_rag_recommendation(
+        query=query,
+        ranked_listings=final_results,
+        top_k=3
     )
 
-    print("\nRentWise Recommendation:\n")
-    print(recommendation)
+    print("\nRentWise RAG Recommendation:\n")
+    print(rag_answer)

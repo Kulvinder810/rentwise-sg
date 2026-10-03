@@ -1,3 +1,102 @@
+import pandas as pd
+from models import RentalPreferences
+
+def generate_match_reasons(
+    listing,
+    preferences: RentalPreferences
+):
+
+    reasons = []
+    tradeoffs = []
+
+    # Budget
+    if preferences.max_rent is not None:
+
+        savings = preferences.max_rent - listing["rent"]
+
+        if savings >= 0:
+            reasons.append(
+                f"Rent is S${listing['rent']}, "
+                f"S${savings} below your maximum budget."
+            )
+
+    # Commute
+    if preferences.max_commute_minutes is not None:
+
+        reasons.append(
+            f"Commute is approximately "
+            f"{listing['commute_minutes']} minutes."
+        )
+
+    # Cooking
+    if preferences.cooking_required is True:
+
+        reasons.append(
+            "Cooking is allowed."
+        )
+
+    # Landlord
+    if preferences.no_live_in_landlord is True:
+
+        reasons.append(
+            "No live-in landlord."
+        )
+
+    # MRT
+    if preferences.near_mrt_preferred is True:
+
+        walk = listing["mrt_walk_minutes"]
+
+        if walk <= 5:
+            reasons.append(
+                f"Very close to MRT: about {walk} minutes walking."
+            )
+
+        elif walk <= 10:
+            reasons.append(
+                f"Reasonably close to MRT: about {walk} minutes walking."
+            )
+
+        else:
+            tradeoffs.append(
+                f"MRT is around {walk} minutes walking."
+            )
+
+    # Preferred room type
+    if preferences.preferred_room_type is not None:
+
+        if (
+            listing["room_type"].lower()
+            == preferences.preferred_room_type.lower()
+        ):
+            reasons.append(
+                f"Matches your preferred "
+                f"{preferences.preferred_room_type} room type."
+            )
+
+        else:
+            tradeoffs.append(
+                f"This is a {listing['room_type']} room "
+                f"instead of your preferred "
+                f"{preferences.preferred_room_type} room."
+            )
+
+    # Private bathroom
+    if preferences.private_bathroom_preferred is True:
+
+        if listing["private_bathroom"]:
+            reasons.append(
+                "Includes a private bathroom."
+            )
+
+        else:
+            tradeoffs.append(
+                "Does not include a private bathroom."
+            )
+
+    return reasons, tradeoffs
+
+
 def rank_listings(
     listings: pd.DataFrame,
     preferences: RentalPreferences

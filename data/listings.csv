@@ -1,9 +1,9 @@
-id,title,area,rent,mrt,mrt_walk_minutes,commute_minutes,cooking_allowed,live_in_landlord,room_type,private_bathroom
-1,Master Room at Queenstown,Queenstown,1650,Queenstown,6,24,true,false,master,true
-2,Common Room at Clementi,Clementi,1250,Clementi,4,38,true,true,common,false
-3,Master Room at HarbourFront,HarbourFront,1900,HarbourFront,7,15,true,false,master,true
-4,Common Room at Tiong Bahru,Tiong Bahru,1450,Tiong Bahru,9,27,false,false,common,false
-5,Master Room at Bukit Merah,Bukit Merah,1750,Redhill,12,21,true,false,master,true
-6,Common Room at Queenstown,Queenstown,1350,Queenstown,5,23,true,false,common,false
-7,Master Room at Jurong East,Jurong East,1600,Jurong East,5,48,true,false,master,true
-8,Common Room at Telok Blangah,Telok Blangah,1500,Telok Blangah,3,12,true,false,common,false
+id,title,area,rent,mrt,mrt_walk_minutes,commute_minutes,cooking_allowed,live_in_landlord,room_type,private_bathroom,description
+1,Master Room at Queenstown,Queenstown,1650,Queenstown,6,24,true,false,master,true,"Bright high-floor master room in a peaceful residential area. Convenient MRT access and full cooking allowed."
+2,Common Room at Clementi,Clementi,1250,Clementi,4,38,true,true,common,false,"Affordable common room close to Clementi MRT. Lively neighborhood with many food options and shared kitchen access."
+3,Master Room at HarbourFront,HarbourFront,1900,HarbourFront,7,15,true,false,master,true,"Modern master bedroom close to HarbourFront with quick access to shopping, dining and waterfront attractions."
+4,Common Room at Tiong Bahru,Tiong Bahru,1450,Tiong Bahru,9,27,false,false,common,false,"Cozy room in a trendy heritage neighborhood surrounded by cafes and restaurants. Cooking is restricted."
+5,Master Room at Bukit Merah,Bukit Merah,1750,Redhill,12,21,true,false,master,true,"Spacious master bedroom in a quiet estate with private bathroom and flexible kitchen use."
+6,Common Room at Queenstown,Queenstown,1350,Queenstown,5,23,true,false,common,false,"Simple and affordable room near Queenstown MRT with convenient public transport and cooking allowed."
+7,Master Room at Jurong East,Jurong East,1600,Jurong East,5,48,true,false,master,true,"Large master room near major malls and transport connections in a busy commercial district."
+8,Common Room at Telok Blangah,Telok Blangah,1500,Telok Blangah,3,12,true,false,common,false,"Comfortable room with excellent transport access, short MRT walk and convenient commute toward Labrador Park."
