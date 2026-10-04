@@ -47,12 +47,15 @@ def generate_rag_recommendation(
                 "match_percentage": float(
                     listing["match_percentage"]
                 ),
-                "semantic_score": float(
-                    listing["semantic_score"]
+                "semantic_distance": float(
+                    listing["semantic_distance"]
                 ),
                 "final_score": float(
                     listing["final_score"]
                 ),
+                "semantic_percentage": float(
+                    listing["semantic_percentage"]
+                ),          
                 "reasons": listing["reasons"],
                 "tradeoffs": listing["tradeoffs"]
             }

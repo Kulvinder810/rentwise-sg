@@ -79,14 +79,14 @@ else:
     print("\nFinal RentWise Ranking:\n")
 
     print(
-        final_results[
-            [
-                "title",
-                "match_percentage",
-                "semantic_score",
-                "semantic_percentage",
-                "final_score"
-            ]
+    final_results[
+        [
+            "title",
+            "match_percentage",
+            "semantic_distance",
+            "semantic_percentage",
+            "final_score"
+        ]
         ].head(5)
     )
 

@@ -9,18 +9,18 @@ def combine_scores(
 
     results = listings.copy()
 
-    min_score = results["semantic_score"].min()
-    max_score = results["semantic_score"].max()
+    min_distance = results["semantic_distance"].min()
+    max_distance = results["semantic_distance"].max()
 
-    # --------------------------------
-    # Normalize semantic score to 0-100
-    # --------------------------------
+    # -----------------------------
+    # Normalize semantic distance
+    # -----------------------------
 
     if len(results) == 1:
 
         results["semantic_percentage"] = 100.0
 
-    elif max_score == min_score:
+    elif max_distance == min_distance:
 
         results["semantic_percentage"] = 50.0
 
@@ -28,20 +28,20 @@ def combine_scores(
 
         results["semantic_percentage"] = (
             (
-                results["semantic_score"]
-                - min_score
+                max_distance
+                - results["semantic_distance"]
             )
             /
             (
-                max_score
-                - min_score
+                max_distance
+                - min_distance
             )
             * 100
         )
 
-    # --------------------------------
-    # Final hybrid score
-    # --------------------------------
+    # -----------------------------
+    # Hybrid score
+    # -----------------------------
 
     results["final_score"] = (
         results["match_percentage"]
@@ -51,6 +51,7 @@ def combine_scores(
         * semantic_weight
     ).round(1)
 
+    # VERY IMPORTANT
     return results.sort_values(
         "final_score",
         ascending=False
